@@ -109,5 +109,36 @@ module('Integration | Component | one-way-input-mask', function(hooks) {
 
     await fillIn('input', '155');	
     assert.dom('input').hasValue('15');	
+  });
+
+  test('Inputs value correcly even when input have multiple masks', async function(assert) {
+    this.set('masks', ['9.9.9', '99.9-9']);
+    this.set('data', null);
+    this.set('update', (unmasked) => {
+      this.set('data', unmasked)
+    })
+
+    await render(hbs`<OneWayInputMask @value={{data}} @mask={{this.masks}} @update={{update}} />`);
+
+    await focus('input');
+    await triggerKeyEvent('input', 'keypress', '1');
+    await triggerKeyEvent('input', 'keydown', '1');
+    await triggerKeyEvent('input', 'keyup', '1');
+
+    await triggerKeyEvent('input', 'keypress', '3');
+    await triggerKeyEvent('input', 'keydown', '3');
+    await triggerKeyEvent('input', 'keyup', '3');
+
+    await triggerKeyEvent('input', 'keypress', '4');
+    await triggerKeyEvent('input', 'keydown', '4');
+    await triggerKeyEvent('input', 'keyup', '4');
+
+    assert.dom('input').hasValue("1.3.4");
+
+    await triggerKeyEvent('input', 'keypress', '5');
+    await triggerKeyEvent('input', 'keydown', '5');
+    await triggerKeyEvent('input', 'keyup', '5');
+
+    assert.dom('input').hasValue("13.4-5");
   });	
 });
